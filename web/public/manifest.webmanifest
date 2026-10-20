@@ -1,8 +1,8 @@
 {
   "name": "Gragarda Voice",
   "short_name": "Gragarda Voice",
-  "description": "Répare et embellit la voix de tes vidéos, directement dans ton téléphone.",
-  "lang": "fr",
+  "description": "Fixes and enhances the voice in your videos, right in your browser. Nothing is uploaded.",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

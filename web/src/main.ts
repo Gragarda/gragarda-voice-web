@@ -1,5 +1,6 @@
 import { extractAudio, remux } from './media/ffmpeg';
 import { AbPlayer } from './ui/abPlayer';
+import { LANGS, applyLang, currentLang, t } from './i18n';
 
 const MAX_SECONDS = 180, MAX_BYTES = 500e6; // limites v1 : memoire de Safari iOS
 
@@ -7,9 +8,9 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getEleme
 const screens = ['home', 'preset', 'work', 'result', 'error'];
 const show = (id: string) => screens.forEach(s => ($(s).hidden = s !== id));
 
-// Presets : core/presets/*.json, lus tels quels (le coeur C++ ignore label/hint)
+// Presets : core/presets/*.json, passes tels quels au coeur ; nom et description affiches = i18n (p_<name>, h_<name>)
 const presets = Object.values(import.meta.glob('../../core/presets/*.json', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)
-  .map(json => ({ json, ...(JSON.parse(json) as { name: string; label: string; hint: string }) }));
+  .map(json => ({ json, name: (JSON.parse(json) as { name: string }).name }));
 const ORDER = ['face-camera', 'voiture', 'dehors', 'a-plusieurs', 'piece-qui-resonne'];
 presets.sort((a, b) => ORDER.indexOf(a.name) - ORDER.indexOf(b.name));
 
@@ -22,6 +23,13 @@ const caps = {
 let file: File | null = null;
 let player: AbPlayer | null = null;
 let outUrl = '';
+
+// Langue : selecteur (noms dans leur propre langue), tout le texte est retraduit sans recharger
+const langSel = $<HTMLSelectElement>('lang');
+for (const [code, { name }] of Object.entries(LANGS)) langSel.add(new Option(name, code));
+langSel.value = currentLang();
+langSel.addEventListener('change', () => { applyLang(langSel.value); renderCards(); });
+applyLang();
 
 function fail(msg: string) {
   $('error-text').textContent = msg;
@@ -70,7 +78,7 @@ document.addEventListener('drop', e => {
   const f = e.dataTransfer?.files[0];
   if (!f || $('home').hidden) return;
   if (!f.type.startsWith('video/') && !/\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name)) {
-    $('home-error').textContent = 'Ce fichier n’est pas une vidéo.';
+    $('home-error').textContent = t('errNotVideo');
     $('home-error').hidden = false;
     return;
   }
@@ -79,8 +87,8 @@ document.addEventListener('drop', e => {
 
 async function pick(f: File) {
   const err = $('home-error');
-  const tooLong = 'Vidéo trop longue pour le navigateur, coupe-la en plusieurs morceaux (3 minutes max).';
-  if (!caps.wasm) { err.textContent = 'Ce navigateur est trop ancien. Essaie avec Safari ou Chrome à jour.'; err.hidden = false; return; }
+  const tooLong = t('errLong');
+  if (!caps.wasm) { err.textContent = t('errOld'); err.hidden = false; return; }
   if (f.size > MAX_BYTES) { err.textContent = tooLong; err.hidden = false; return; }
   const d = await videoDuration(f);
   if (d > MAX_SECONDS + 0.5) { err.textContent = tooLong; err.hidden = false; return; }
@@ -88,30 +96,31 @@ async function pick(f: File) {
   show('preset');
 }
 
-const cards = $('presets');
-for (const p of presets) {
-  const b = document.createElement('button');
-  b.className = 'card';
-  b.innerHTML = '<b></b><span></span>';
-  b.querySelector('b')!.textContent = p.label;
-  b.querySelector('span')!.textContent = p.hint;
-  b.addEventListener('click', () => file && run(file, p.json));
-  cards.appendChild(b);
+function renderCards() {
+  const cards = $('presets');
+  cards.replaceChildren();
+  for (const p of presets) {
+    const b = document.createElement('button');
+    b.className = 'card';
+    b.innerHTML = '<b></b><span></span>';
+    b.querySelector('b')!.textContent = t(`p_${p.name}` as Parameters<typeof t>[0]);
+    b.querySelector('span')!.textContent = t(`h_${p.name}` as Parameters<typeof t>[0]);
+    b.addEventListener('click', () => file && run(file, p.json));
+    cards.appendChild(b);
+  }
 }
+renderCards();
 
 // ---- Traitement ----
-const STEPS = [
-  ['read', 'Lecture'], ['cuts', 'Recherche des cuts'], ['pops', 'Plops'],
-  ['analysis', 'Analyse'], ['processing', 'Traitement'], ['export', 'Export'],
-] as const;
-type Step = (typeof STEPS)[number][0];
+const STEPS = ['read', 'cuts', 'pops', 'analysis', 'processing', 'export'] as const;
+type Step = (typeof STEPS)[number];
 const WEIGHT: Record<Step, number> = { read: 0.15, cuts: 0, pops: 0.1, analysis: 0.1, processing: 0.35, export: 0.3 };
 const progress: Partial<Record<Step, number>> = {};
 
 function setStep(step: Step, state: 'active' | 'done' | 'skipped', p = state === 'active' ? 0 : 1) {
   $('step-' + step).className = state;
   progress[step] = p;
-  const total = STEPS.reduce((s, [k]) => s + WEIGHT[k] * (progress[k] ?? 0), 0);
+  const total = STEPS.reduce((s, k) => s + WEIGHT[k] * (progress[k] ?? 0), 0);
   $('bar-fill').style.transform = `scaleX(${total})`;
 }
 
@@ -149,7 +158,7 @@ function runDsp(audio: Float32Array, cuts: number[], preset: string): Promise<{ 
 }
 
 async function run(f: File, preset: string) {
-  $('steps').innerHTML = STEPS.map(([k, label]) => `<li id="step-${k}">${label}</li>`).join('');
+  $('steps').innerHTML = STEPS.map(k => `<li id="step-${k}" data-i18n="s_${k}">${t(`s_${k}`)}</li>`).join('');
   for (const k in progress) delete progress[k as Step];
   setStep('read', 'active');
   show('work');
@@ -170,8 +179,7 @@ async function run(f: File, preset: string) {
     showResult(out, original, audio, report.popsRemoved as number);
   } catch (err) {
     console.error(err);
-    fail(err instanceof Error && err.message.startsWith('Cette') ? err.message
-      : 'Le traitement a échoué. Si la vidéo est longue, coupe-la en morceaux plus courts et réessaie.');
+    fail(t(err instanceof Error && err.message === 'NO_SOUND' ? 'errNoSound' : 'errFailed'));
   }
 }
 
@@ -182,7 +190,7 @@ function showResult(out: Blob, before: Float32Array, after: Float32Array, pops: 
   video.src = outUrl;
   player = new AbPlayer(video, before, after);
   setAb(true);
-  $('pops').textContent = pops === 0 ? '' : pops === 1 ? '1 plop supprimé' : `${pops} plops supprimés`;
+  $('pops').textContent = pops === 0 ? '' : pops === 1 ? t('pop1') : t('popN', { n: pops });
   const name = (file?.name.replace(/\.[^.]+$/, '') || 'video') + '-gragarda.mp4';
   const outFile = new File([out], name, { type: 'video/mp4' });
   const dl = $<HTMLAnchorElement>('download');

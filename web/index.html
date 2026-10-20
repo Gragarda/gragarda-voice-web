@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Gragarda Voice</title>
-  <meta name="description" content="Répare et embellit la voix de tes vidéos, directement dans ton téléphone. Gratuit, rien n'est envoyé sur Internet.">
+  <meta name="description" content="Fixes and enhances the voice in your videos, right in your browser. Free, nothing is uploaded.">
   <meta name="theme-color" content="#6b3fd4">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -12,56 +12,63 @@
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
+  <!-- Textes : src/i18n.ts (langue du navigateur ; l'anglais ci-dessous ne sert que sans JS) -->
   <main>
     <header>
       <h1>Gragarda <span>Voice</span></h1>
     </header>
 
     <section id="home">
-      <p class="lead">Une voix propre pour tes vidéos, en 3 gestes.</p>
-      <label class="big-button" for="file">Choisir une vidéo</label>
+      <p class="lead" data-i18n="lead">Clean voice for your videos, in 3 taps.</p>
+      <label class="big-button" for="file" data-i18n="choose">Choose a video</label>
       <input id="file" type="file" accept="video/*" hidden>
-      <p class="drop-hint small">ou glisse-la ici</p>
-      <p class="trust">🔒 Ta vidéo ne quitte jamais ton téléphone. Tout se passe ici, sans envoi sur Internet.</p>
+      <p class="drop-hint small" data-i18n="dropHint">or drop it here</p>
+      <p class="trust" data-i18n="trust">🔒 Your video never leaves your device. Everything happens here, nothing is uploaded.</p>
       <p id="home-error" class="error" hidden></p>
       <details class="install">
-        <summary>Ajouter à l’écran d’accueil</summary>
-        <p><b>iPhone (Safari)</b> : bouton Partager <span aria-hidden="true">⎙</span> puis « Sur l’écran d’accueil ».</p>
-        <p><b>Android (Chrome)</b> : menu ⋮ puis « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
+        <summary data-i18n="install">Add to home screen</summary>
+        <p data-i18n-html="installIos"></p>
+        <p data-i18n-html="installAndroid"></p>
       </details>
-      <p class="small">Tu streames ? Le même traitement existe en plugin OBS et VST : <a href="https://voice.gragarda.fr" target="_blank" rel="noopener">voice.gragarda.fr</a></p>
+      <p class="small"><span data-i18n="obs">Streaming? The same processing exists as an OBS and VST plugin:</span>
+        <a href="https://voice.gragarda.fr" target="_blank" rel="noopener">voice.gragarda.fr</a></p>
     </section>
 
     <section id="preset" hidden>
-      <h2>C’était filmé comment ?</h2>
+      <h2 data-i18n="presetTitle">How was it filmed?</h2>
       <div id="presets" class="cards"></div>
-      <button class="link" data-back>← Changer de vidéo</button>
+      <button class="link" data-back data-i18n="back">← Change video</button>
     </section>
 
     <section id="work" hidden>
-      <h2>On s’occupe de ta voix…</h2>
+      <h2 data-i18n="workTitle">Working on your voice…</h2>
       <ol id="steps" class="steps"></ol>
       <div class="bar"><div id="bar-fill"></div></div>
-      <p class="small">Garde l’app ouverte, tout se calcule sur ton téléphone.</p>
+      <p class="small" data-i18n="workHint">Keep this page open, everything runs on your device.</p>
     </section>
 
     <section id="result" hidden>
       <video id="player" playsinline controls></video>
-      <div class="ab" role="group" aria-label="Comparer">
-        <button id="ab-before">Avant</button>
-        <button id="ab-after" class="on">Après</button>
+      <div class="ab" role="group" data-i18n-label="compare">
+        <button id="ab-before" data-i18n="before">Before</button>
+        <button id="ab-after" class="on" data-i18n="after">After</button>
       </div>
       <p id="pops" class="pops"></p>
-      <button id="share" class="big-button">Partager</button>
-      <a id="download" class="secondary" download="gragarda-voice.mp4">Télécharger</a>
-      <button class="link" data-back>Traiter une autre vidéo</button>
+      <button id="share" class="big-button" data-i18n="share">Share</button>
+      <a id="download" class="secondary" download="gragarda-voice.mp4" data-i18n="download">Download</a>
+      <button class="link" data-back data-i18n="again">Process another video</button>
     </section>
 
     <section id="error" hidden>
-      <h2>Oups</h2>
+      <h2 data-i18n="errTitle">Oops</h2>
       <p id="error-text" class="error"></p>
-      <button class="big-button" data-back>Recommencer</button>
+      <button class="big-button" data-back data-i18n="restart">Start over</button>
     </section>
+
+    <footer>
+      <label class="small"><span data-i18n="language">Language</span>
+        <select id="lang"></select></label>
+    </footer>
   </main>
   <script type="module" src="/src/main.ts"></script>
 </body>

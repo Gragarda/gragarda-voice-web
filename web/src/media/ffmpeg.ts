@@ -49,10 +49,10 @@ async function exec(f: FFmpeg, args: string[], onProgress?: (p: number) => void)
 export async function extractAudio(file: File, onProgress?: (p: number) => void): Promise<Float32Array> {
   return withInput(file, async (f, path) => {
     await exec(f, ['-i', path, '-vn', '-ac', '1', '-ar', '48000', '-f', 'f32le', '/audio.f32'], onProgress)
-      .catch(e => { throw /does not contain any stream|matches no streams/.test(e.message) ? new Error('Cette vidéo n’a pas de son.') : e; });
+      .catch(e => { throw /does not contain any stream|matches no streams/.test(e.message) ? new Error('NO_SOUND') : e; });
     const data = (await f.readFile('/audio.f32')) as Uint8Array;
     await f.deleteFile('/audio.f32');
-    if (!data.byteLength) throw new Error('Cette vidéo n’a pas de son.');
+    if (!data.byteLength) throw new Error('NO_SOUND');
     return new Float32Array(data.buffer, data.byteOffset, data.byteLength / 4);
   });
 }
