@@ -1,12 +1,13 @@
 // Bindings Emscripten du pipeline hors temps reel.
-// JS : const { report, channels } = Module.run([Float32Array...], 48000, [cuts s], presetJson, stage => {})
+// JS : const { report, channels } = Module.run([Float32Array...], 48000, [cuts s], presetJson, stage => {}, denoise?)
+// denoise(Float32Array) optionnel : debruite en place (vue sur le tas WASM), remplace RNNoise.
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include "gv/Pipeline.h"
 
 using emscripten::val;
 
-static val run(val channels, int sampleRate, val cuts, std::string preset, val onProgress)
+static val run(val channels, int sampleRate, val cuts, std::string preset, val onProgress, val denoise)
 {
     gv::AudioBuffer b;
     b.sampleRate = sampleRate;
@@ -18,7 +19,9 @@ static val run(val channels, int sampleRate, val cuts, std::string preset, val o
     const gv::Report r = gv::runPipeline(b, cutList, preset, [](const char* s, void* u) {
         val& cb = *static_cast<val*>(u);
         if (cb.typeOf().as<std::string>() == "function") cb(std::string(s));
-    }, &onProgress);
+    }, &onProgress, denoise.typeOf().as<std::string>() != "function" ? gv::Denoiser{} : gv::Denoiser([&](std::vector<float>& v) {
+        denoise(val(emscripten::typed_memory_view(v.size(), v.data()))); // ne doit pas allouer dans ce tas
+    }));
 
     val out = val::object();
     out.set("report", r.toJson());

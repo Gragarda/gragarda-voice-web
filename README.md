@@ -9,7 +9,7 @@ Spécification complète : [SPEC.md](SPEC.md).
 | Dossier | Contenu |
 |---|---|
 | `core/` | submodule [gragarda-voice-core](https://github.com/Gragarda/gragarda-voice-core) (branche `feature/offline`) : `offline/` = pipeline fichier entier (plops, analyse, traitement), `presets/*.json` |
-| `wasm/` | bindings Emscripten (`Module.run`), test Node « WASM = gv-cli » |
+| `wasm/` | bindings Emscripten (`Module.run`), test Node « WASM = gv-cli », `dfn/` = DeepFilterNet 3 en WASM (Rust, modèle intégré) |
 | `web/` | PWA Vite + TypeScript : UI, workers (DSP, cuts WebCodecs), ffmpeg.wasm |
 | `tools/gv-cli/` | `gv-cli in.wav out.wav --preset p.json [--cuts cuts.json] [--report r.json]` |
 | `tools/cut-calibration/` | même détection de cuts qu'en TS, en Python + ffmpeg, pour calibrer les seuils |
@@ -23,6 +23,8 @@ cmake -S . -B build -DGV_CORE_TESTS=ON && cmake --build build --config Release
 ctest --test-dir build/core -C Release
 # WASM (emsdk activé) -> web/src/wasm/
 emcmake cmake -S . -B build-wasm -DCMAKE_BUILD_TYPE=Release && cmake --build build-wasm
+# DeepFilterNet (rustup target add wasm32-unknown-unknown ; cargo install wasm-bindgen-cli --version 0.2.92)
+cd wasm/dfn && cargo build --release --target wasm32-unknown-unknown &&   wasm-bindgen --target web --out-dir ../../web/src/wasm/dfn target/wasm32-unknown-unknown/release/gv_dfn.wasm && cd ../..
 # web
 cd web && npm ci && npm test && npm run dev
 ```
@@ -48,6 +50,14 @@ Sans ces en-têtes, l'app fonctionne quand même : `crossOriginIsolated` est fau
 - **Audio traité en mono** (downmix), réencodé en AAC 48 kHz stéréo 192 kbps.
 - **Pas de coi-serviceworker** : le mode monothread suffit comme repli.
 - **Calibration des cuts sans OpenCV** : ffmpeg décode et réduit déjà les images.
+
+## Débruitage
+
+Le web utilise **DeepFilterNet 3** (~10 Mo compressés, chargé une fois puis en cache) : il sépare la parole de tout le
+reste, y compris un caméraman qui respire près du micro pendant que d'autres parlent. S'il ne se charge pas, le cœur
+retombe sur RNNoise (dosé selon le bruit mesuré). `gv-cli` utilise RNNoise.
+Avant lui, les raies tonales stables du bruit de fond (sifflement, ventilation, secteur) sont repérées et coupées.
+Après, un nivellement lent ramène chaque personne au même volume, qu'elle soit près ou loin du micro (±10 dB).
 
 ## Limites connues
 

@@ -1,0 +1,21 @@
+# DeepFilterNet 3 pour le web : un seul appel sur tout le fichier, modele integre (pas de 2e telechargement).
+# cargo build --release --target wasm32-unknown-unknown && wasm-bindgen --target web --out-dir ../../web/src/wasm/dfn target/wasm32-unknown-unknown/release/gv_dfn.wasm
+[package]
+name = "gv_dfn"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+deep_filter = { git = "https://github.com/Rikorose/DeepFilterNet", rev = "d375b2d8309e0935d165700c91da9de862a99c31", default-features = false, features = ["tract", "default-model"] }
+ndarray = "0.15"
+wasm-bindgen = "=0.2.92"
+getrandom = { version = "0.2", features = ["js"] } # active la source d'aleatoire JS pour les deps de tract
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

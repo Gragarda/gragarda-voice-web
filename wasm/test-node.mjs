@@ -27,7 +27,7 @@ const gv = await createGv();
 const input = readWav(inWav);
 const stages = [];
 const cuts = cutsPath ? JSON.parse(readFileSync(cutsPath, 'utf8')) : [];
-const { report, channels } = gv.run(input.ch, input.sr, cuts, readFileSync(presetPath, 'utf8'), s => stages.push(s));
+const { report, channels } = gv.run(input.ch, input.sr, cuts, readFileSync(presetPath, 'utf8'), s => stages.push(s), undefined);
 assert.deepEqual(stages, ['pops', 'analysis', 'processing']);
 
 const cli = readWav(cliWav);
