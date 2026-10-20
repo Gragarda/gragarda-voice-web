@@ -52,9 +52,32 @@ function videoDuration(f: File): Promise<number> {
   });
 }
 
-$('file').addEventListener('change', async e => {
+$('file').addEventListener('change', e => {
   const f = (e.target as HTMLInputElement).files?.[0];
-  if (!f) return;
+  if (f) void pick(f);
+});
+
+// Glisser-deposer : toute la page est une zone de depot tant que l'accueil est affiche
+let dragDepth = 0;
+const dropping = (on: boolean) => document.body.classList.toggle('dragging', on);
+document.addEventListener('dragenter', e => { if (!$('home').hidden) { e.preventDefault(); dragDepth++; dropping(true); } });
+document.addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; dropping(false); } });
+document.addEventListener('dragover', e => e.preventDefault()); // sinon le navigateur ouvre la video
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  dragDepth = 0;
+  dropping(false);
+  const f = e.dataTransfer?.files[0];
+  if (!f || $('home').hidden) return;
+  if (!f.type.startsWith('video/') && !/\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name)) {
+    $('home-error').textContent = 'Ce fichier n’est pas une vidéo.';
+    $('home-error').hidden = false;
+    return;
+  }
+  void pick(f);
+});
+
+async function pick(f: File) {
   const err = $('home-error');
   const tooLong = 'Vidéo trop longue pour le navigateur, coupe-la en plusieurs morceaux (3 minutes max).';
   if (!caps.wasm) { err.textContent = 'Ce navigateur est trop ancien. Essaie avec Safari ou Chrome à jour.'; err.hidden = false; return; }
@@ -63,7 +86,7 @@ $('file').addEventListener('change', async e => {
   if (d > MAX_SECONDS + 0.5) { err.textContent = tooLong; err.hidden = false; return; }
   file = f;
   show('preset');
-});
+}
 
 const cards = $('presets');
 for (const p of presets) {

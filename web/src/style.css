@@ -36,6 +36,15 @@ a { color: var(--accent); }
 .link { background: none; border: 0; color: var(--muted); font: inherit; padding: 12px 0; cursor: pointer; text-decoration: underline; }
 .error { color: var(--err); }
 
+/* Glisser-deposer : indice seulement avec une souris ; cadre sur toute la page pendant le survol */
+.drop-hint { text-align: center; margin: 8px 0 0; }
+@media (hover: none) { .drop-hint { display: none; } }
+body.dragging::after {
+  content: "Dépose ta vidéo"; position: fixed; inset: 12px; display: grid; place-items: center;
+  border: 3px dashed var(--accent); border-radius: 18px; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  color: var(--accent); font-size: 1.3rem; font-weight: 700; pointer-events: none; z-index: 10;
+}
+
 .cards { display: grid; gap: 12px; margin-bottom: 8px; }
 .card {
   display: block; width: 100%; text-align: left; padding: 16px; border-radius: 14px;
