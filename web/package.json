@@ -1,0 +1,24 @@
+{
+  "name": "gragarda-voice-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "postinstall": "node scripts/copy-ffmpeg.mjs",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --no-warnings src/media/cutDetect.test.ts"
+  },
+  "dependencies": {
+    "@ffmpeg/core": "0.12.10",
+    "@ffmpeg/core-mt": "0.12.10",
+    "@ffmpeg/ffmpeg": "0.12.15",
+    "mp4box": "0.5.4"
+  },
+  "devDependencies": {
+    "@types/dom-webcodecs": "0.1.13",
+    "typescript": "5.9.3",
+    "vite": "6.3.5"
+  }
+}

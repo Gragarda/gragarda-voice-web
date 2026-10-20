@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gragarda Voice</title>
+  <meta name="description" content="Répare et embellit la voix de tes vidéos, directement dans ton téléphone. Gratuit, rien n'est envoyé sur Internet.">
+  <meta name="theme-color" content="#6b3fd4">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Gragarda <span>Voice</span></h1>
+    </header>
+
+    <section id="home">
+      <p class="lead">Une voix propre pour tes vidéos, en 3 gestes.</p>
+      <label class="big-button" for="file">Choisir une vidéo</label>
+      <input id="file" type="file" accept="video/*" hidden>
+      <p class="trust">🔒 Ta vidéo ne quitte jamais ton téléphone. Tout se passe ici, sans envoi sur Internet.</p>
+      <p id="home-error" class="error" hidden></p>
+      <details class="install">
+        <summary>Ajouter à l’écran d’accueil</summary>
+        <p><b>iPhone (Safari)</b> : bouton Partager <span aria-hidden="true">⎙</span> puis « Sur l’écran d’accueil ».</p>
+        <p><b>Android (Chrome)</b> : menu ⋮ puis « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
+      </details>
+      <p class="small">Tu streames ? Le même traitement existe en plugin OBS et VST : <a href="https://voice.gragarda.fr" target="_blank" rel="noopener">voice.gragarda.fr</a></p>
+    </section>
+
+    <section id="preset" hidden>
+      <h2>Où as-tu filmé ?</h2>
+      <div id="presets" class="cards"></div>
+      <button class="link" data-back>← Changer de vidéo</button>
+    </section>
+
+    <section id="work" hidden>
+      <h2>On s’occupe de ta voix…</h2>
+      <ol id="steps" class="steps"></ol>
+      <div class="bar"><div id="bar-fill"></div></div>
+      <p class="small">Garde l’app ouverte, tout se calcule sur ton téléphone.</p>
+    </section>
+
+    <section id="result" hidden>
+      <video id="player" playsinline controls></video>
+      <div class="ab" role="group" aria-label="Comparer">
+        <button id="ab-before">Avant</button>
+        <button id="ab-after" class="on">Après</button>
+      </div>
+      <p id="pops" class="pops"></p>
+      <button id="share" class="big-button">Partager</button>
+      <a id="download" class="secondary" download="gragarda-voice.mp4">Télécharger</a>
+      <button class="link" data-back>Traiter une autre vidéo</button>
+    </section>
+
+    <section id="error" hidden>
+      <h2>Oups</h2>
+      <p id="error-text" class="error"></p>
+      <button class="big-button" data-back>Recommencer</button>
+    </section>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
