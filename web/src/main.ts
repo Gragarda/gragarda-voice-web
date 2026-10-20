@@ -10,7 +10,7 @@ const show = (id: string) => screens.forEach(s => ($(s).hidden = s !== id));
 // Presets : core/presets/*.json, lus tels quels (le coeur C++ ignore label/hint)
 const presets = Object.values(import.meta.glob('../../core/presets/*.json', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)
   .map(json => ({ json, ...(JSON.parse(json) as { name: string; label: string; hint: string }) }));
-const ORDER = ['voix-chaude', 'piece-qui-resonne', 'dehors-vent', 'voix-off'];
+const ORDER = ['face-camera', 'voiture', 'dehors', 'a-plusieurs', 'piece-qui-resonne'];
 presets.sort((a, b) => ORDER.indexOf(a.name) - ORDER.indexOf(b.name));
 
 // Capacites : jamais de page blanche, toujours un mode degrade
