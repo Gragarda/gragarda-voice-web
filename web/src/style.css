@@ -17,7 +17,8 @@ main {
   max-width: 520px; margin: 0 auto;
   padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
 }
-header h1 { font-size: 1.4rem; margin: 8px 0 24px; letter-spacing: -0.01em; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 24px; }
+header h1 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
 header h1 span { color: var(--accent); }
 h2 { font-size: 1.25rem; margin: 0 0 16px; }
 .lead { font-size: 1.15rem; margin: 0 0 24px; }
@@ -74,5 +75,8 @@ video { width: 100%; max-height: 60vh; border-radius: 14px; background: #000; di
 .install { margin: 24px 0 16px; padding: 12px 16px; border-radius: 12px; background: var(--card); }
 .install summary { cursor: pointer; font-weight: 600; }
 
-footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--line); }
-footer select { margin-inline-start: 8px; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; }
+/* Selecteur de langue en haut a droite (a gauche en RTL) : globe + <select> natif (picker systeme sur mobile) */
+.lang { position: relative; display: flex; align-items: center; color: var(--muted); }
+.lang svg { position: absolute; inset-inline-start: 8px; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; pointer-events: none; }
+.lang select { font: inherit; font-size: 0.92rem; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 8px 8px 32px; min-height: 40px; cursor: pointer; }
+[dir="rtl"] .lang select { padding: 8px 32px 8px 8px; }

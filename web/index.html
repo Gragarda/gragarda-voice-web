@@ -16,6 +16,11 @@
   <main>
     <header>
       <h1>Gragarda <span>Voice</span></h1>
+      <!-- Langue : globe + noms natifs, pas de drapeaux (un drapeau = un pays, pas une langue) -->
+      <label class="lang">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
+        <select id="lang" data-i18n-label="language"></select>
+      </label>
     </header>
 
     <section id="home">
@@ -66,10 +71,6 @@
       <button class="big-button" data-back data-i18n="restart">Start over</button>
     </section>
 
-    <footer>
-      <label class="small"><span data-i18n="language">Language</span>
-        <select id="lang"></select></label>
-    </footer>
   </main>
   <script type="module" src="/src/main.ts"></script>
 </body>
