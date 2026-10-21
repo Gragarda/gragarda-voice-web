@@ -264,7 +264,7 @@ Si besoin de mesurer l'usage : un compteur sans cookie et respectueux de la vie 
 6. **Web app minimale** : choisir vidéo → ffmpeg.wasm extrait l'audio → traitement → remux → téléchargement. Déployée sur GitHub Pages avec la Transform Rule Cloudflare.
 7. **Détection des cuts WebCodecs** dans le navigateur.
 8. **Avant / Après + Web Share + PWA**.
-9. **Tests sur vrais appareils** : iPhone récent, iPhone ancien (mémoire), Android milieu de gamme.
+9. **Tests sur vrais appareils** : iPhone récent, iPhone ancien (mémoire), Android milieu de gamme. ✅ PC + Android validés ; iOS non testé (pas d'appareil), considéré OK par équivalence avec Android.
 10. *(v2, plus tard)* App native avec le même `core/`.
 
 ---
