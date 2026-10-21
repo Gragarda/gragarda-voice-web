@@ -71,6 +71,26 @@ jobs:
         with:
           path: web/dist
 
+  # gv-cli natif (outil de test du coeur) pour les 3 OS
+  cli:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release -j --target gv-cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gv-cli-${{ matrix.os }}
+          path: |
+            build/gv-cli
+            build/Release/gv-cli.exe
+
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
