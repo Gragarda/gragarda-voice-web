@@ -176,7 +176,7 @@ async function run(f: File, preset: string) {
     setStep('export', 'active');
     const out = await remux(f, audio, p => setStep('export', 'active', p));
     setStep('export', 'done');
-    showResult(out, original, audio, report.popsRemoved as number);
+    showResult(out, original, audio, report.popsRemoved as number, report.process);
   } catch (err) {
     console.error(err);
     fail(t(err instanceof Error && err.message === 'NO_SOUND' ? 'errNoSound' : 'errFailed'));
@@ -184,13 +184,19 @@ async function run(f: File, preset: string) {
 }
 
 // ---- Resultat ----
-function showResult(out: Blob, before: Float32Array, after: Float32Array, pops: number) {
+function showResult(out: Blob, before: Float32Array, after: Float32Array, pops: number,
+                    proc: { rt60: number; dereverb: boolean }) {
   outUrl = URL.createObjectURL(out);
   const video = $<HTMLVideoElement>('player');
   video.src = outUrl;
   player = new AbPlayer(video, before, after);
   setAb(true);
   $('pops').textContent = pops === 0 ? '' : pops === 1 ? t('pop1') : t('popN', { n: pops });
+  // Voyant d'echo : vert = rien a faire, orange = de-reverb, rouge = piece tres reverberante (seuils du coeur, kRt60On/kRt60Red)
+  const echo = $('echo');
+  echo.hidden = !(proc.rt60 > 0);
+  echo.dataset.level = proc.rt60 > 0.6 ? 'red' : proc.dereverb ? 'orange' : 'green';
+  echo.textContent = t(proc.dereverb ? 'echoCut' : 'echo', { s: proc.rt60.toFixed(2) });
   const name = (file?.name.replace(/\.[^.]+$/, '') || 'video') + '-gragarda.mp4';
   const outFile = new File([out], name, { type: 'video/mp4' });
   const dl = $<HTMLAnchorElement>('download');
