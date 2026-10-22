@@ -248,9 +248,11 @@ function showResult(out: Blob, before: Float32Array, after: Float32Array, pops: 
   // Voyant d'echo : vert = rien a faire, orange = de-reverb, rouge = piece tres reverberante (seuils du coeur, kRt60On/kRt60Red)
   const echo = $('echo');
   // Force manuelle ou RT60 non mesure : on affiche la force choisie (celle que le coeur a appliquee)
-  const rt60 = force && proc.dereverb ? Number(force) : proc.rt60;
+  // Rouge = diagnostic sur un RT60 mesure ; une force choisie reste orange
+  const forced = !!force && proc.dereverb;
+  const rt60 = forced ? Number(force) : proc.rt60;
   echo.hidden = !(rt60 > 0);
-  echo.dataset.level = rt60 > 0.6 ? 'red' : proc.dereverb ? 'orange' : 'green';
+  echo.dataset.level = !forced && rt60 > 0.6 ? 'red' : proc.dereverb ? 'orange' : 'green';
   echo.textContent = t(proc.dereverb ? 'echoCut' : 'echo', { s: rt60.toFixed(2) });
   const name = (file?.name.replace(/\.[^.]+$/, '') || 'video') + '-gragarda.mp4';
   const outFile = new File([out], name, { type: 'video/mp4' });
