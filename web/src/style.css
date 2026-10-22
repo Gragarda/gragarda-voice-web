@@ -84,3 +84,10 @@ video { width: 100%; max-height: 60vh; border-radius: 14px; background: #000; di
 .lang svg { position: absolute; inset-inline-start: 8px; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; pointer-events: none; }
 .lang select { font: inherit; font-size: 0.92rem; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 8px 8px 32px; min-height: 40px; cursor: pointer; }
 [dir="rtl"] .lang select { padding: 8px 32px 8px 8px; }
+
+/* Options avancees */
+dialog { max-width: 480px; width: calc(100% - 32px); border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--fg); padding: 20px; }
+dialog::backdrop { background: rgb(0 0 0 / .45); }
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+#adv form { margin-top: 12px; }

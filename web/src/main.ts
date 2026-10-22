@@ -28,7 +28,7 @@ let outUrl = '';
 const langSel = $<HTMLSelectElement>('lang');
 for (const [code, { name }] of Object.entries(LANGS)) langSel.add(new Option(name, code));
 langSel.value = currentLang();
-langSel.addEventListener('change', () => { applyLang(langSel.value); renderCards(); });
+langSel.addEventListener('change', () => { applyLang(langSel.value); renderCards(); renderAdvanced(); });
 applyLang();
 
 function fail(msg: string) {
@@ -105,11 +105,37 @@ function renderCards() {
     b.innerHTML = '<b></b><span></span>';
     b.querySelector('b')!.textContent = t(`p_${p.name}` as Parameters<typeof t>[0]);
     b.querySelector('span')!.textContent = t(`h_${p.name}` as Parameters<typeof t>[0]);
-    b.addEventListener('click', () => file && run(file, p.json));
+    b.addEventListener('click', () => file && run(file, withStages(p.json)));
     cards.appendChild(b);
   }
 }
 renderCards();
+
+// ---- Options avancees : etages coupes = cles du coeur a 0, ajoutees en tete du preset (la 1re occurrence gagne).
+// Memorises sur l'appareil ; stockage indisponible (navigation privee) = rien de coupe au prochain chargement.
+const STAGES = ['pops', 'hpf', 'notch', 'denoise', 'dereverb', 'eq', 'deesser', 'leveler', 'compressor', 'loudness', 'limiter'] as const;
+const off = new Set<string>((() => {
+  try { return JSON.parse(localStorage.getItem('gv-off') ?? '[]') as string[]; } catch { return []; }
+})());
+function renderAdvanced() {
+  $('adv-list').replaceChildren(...STAGES.map(k => {
+    const label = document.createElement('label');
+    label.className = 'check';
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = !off.has(k);
+    box.addEventListener('change', () => {
+      if (box.checked) off.delete(k); else off.add(k);
+      try { localStorage.setItem('gv-off', JSON.stringify([...off])); } catch { /* stockage bloque */ }
+    });
+    label.append(box, ' ' + t(`st_${k}`));
+    return label;
+  }));
+}
+renderAdvanced();
+$('adv-open').addEventListener('click', () => $<HTMLDialogElement>('adv').showModal());
+const withStages = (json: string) =>
+  off.size ? '{' + [...off].map(k => `"${k}": 0, `).join('') + json.slice(json.indexOf('{') + 1) : json;
 
 // ---- Traitement ----
 const STEPS = ['read', 'cuts', 'pops', 'analysis', 'processing', 'export'] as const;

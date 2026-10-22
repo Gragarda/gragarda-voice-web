@@ -42,6 +42,12 @@
     <section id="preset" hidden>
       <h2 data-i18n="presetTitle">How was it filmed?</h2>
       <div id="presets" class="cards"></div>
+      <button id="adv-open" class="link" data-i18n="adv">⚙ Advanced options</button>
+      <dialog id="adv">
+        <p class="small" data-i18n="advIntro">Untick a filter to turn it off. Your choice is kept on this device.</p>
+        <div id="adv-list"></div>
+        <form method="dialog"><button class="big-button" data-i18n="advClose">Close</button></form>
+      </dialog>
       <button class="link" data-back data-i18n="back">← Change video</button>
     </section>
 
