@@ -117,16 +117,40 @@ const STAGES = ['pops', 'hpf', 'notch', 'denoise', 'dereverb', 'eq', 'deesser', 
 const off = new Set<string>((() => {
   try { return JSON.parse(localStorage.getItem('gv-off') ?? '[]') as string[]; } catch { return []; }
 })());
+// Anti-echo : menu (auto / coupe / force). "Coupe" reste dans gv-off ; la force est dans gv-dereverb (RT60 en s).
+const FORCE = ['0.4', '0.7', '1'] as const;
+let force = (() => { try { return localStorage.getItem('gv-dereverb') ?? ''; } catch { return ''; } })();
+if (!(FORCE as readonly string[]).includes(force)) force = '';
+const save = () => {
+  try {
+    localStorage.setItem('gv-off', JSON.stringify([...off]));
+    localStorage.setItem('gv-dereverb', force);
+  } catch { /* stockage bloque */ }
+};
 function renderAdvanced() {
   $('adv-list').replaceChildren(...STAGES.map(k => {
     const label = document.createElement('label');
     label.className = 'check';
+    if (k === 'dereverb') {
+      const sel = document.createElement('select');
+      const opts: [string, Parameters<typeof t>[0]][] =
+        [['auto', 'dr_auto'], ['off', 'dr_off'], ['0.4', 'dr_light'], ['0.7', 'dr_medium'], ['1', 'dr_strong']];
+      for (const [v, key] of opts) sel.add(new Option(t(key), v));
+      sel.value = off.has(k) ? 'off' : force || 'auto';
+      sel.addEventListener('change', () => {
+        if (sel.value === 'off') off.add(k); else off.delete(k);
+        force = sel.value === 'off' || sel.value === 'auto' ? '' : sel.value;
+        save();
+      });
+      label.append(t(`st_${k}`), sel);
+      return label;
+    }
     const box = document.createElement('input');
     box.type = 'checkbox';
     box.checked = !off.has(k);
     box.addEventListener('change', () => {
       if (box.checked) off.delete(k); else off.add(k);
-      try { localStorage.setItem('gv-off', JSON.stringify([...off])); } catch { /* stockage bloque */ }
+      save();
     });
     label.append(box, ' ' + t(`st_${k}`));
     return label;
@@ -134,8 +158,11 @@ function renderAdvanced() {
 }
 renderAdvanced();
 $('adv-open').addEventListener('click', () => $<HTMLDialogElement>('adv').showModal());
-const withStages = (json: string) =>
-  off.size ? '{' + [...off].map(k => `"${k}": 0, `).join('') + json.slice(json.indexOf('{') + 1) : json;
+const withStages = (json: string) => {
+  const keys = [...off].map(k => `"${k}": 0, `);
+  if (force && !off.has('dereverb')) keys.push(`"dereverbRt60": ${force}, `);
+  return keys.length ? '{' + keys.join('') + json.slice(json.indexOf('{') + 1) : json;
+};
 
 // ---- Traitement ----
 const STEPS = ['read', 'cuts', 'pops', 'analysis', 'processing', 'export'] as const;
