@@ -2,13 +2,15 @@
 
 Web app gratuite (PWA) qui répare et embellit la voix d'une vidéo de téléphone, puis la renvoie prête à publier,
 **sans réencoder l'image**. Tout le traitement se fait dans le navigateur : la vidéo ne quitte jamais l'appareil.
+**Utiliser l'app : https://voice.gragarda.fr/app**
+
 Spécification complète : [SPEC.md](SPEC.md).
 
 ## Organisation
 
 | Dossier | Contenu |
 |---|---|
-| `core/` | submodule [gragarda-voice-core](https://github.com/Gragarda/gragarda-voice-core) (branche `feature/offline`) : `offline/` = pipeline fichier entier (plops, analyse, traitement), `presets/*.json` |
+| `core/` | submodule [gragarda-voice-core](https://github.com/Gragarda/gragarda-voice-core) (branche `main`) : `offline/` = pipeline fichier entier (plops, analyse, traitement), `presets/*.json` |
 | `wasm/` | bindings Emscripten (`Module.run`), test Node « WASM = gv-cli », `dfn/` = DeepFilterNet 3 en WASM (Rust, modèle intégré) |
 | `web/` | PWA Vite + TypeScript : UI, workers (DSP, cuts WebCodecs), ffmpeg.wasm |
 | `tools/gv-cli/` | `gv-cli in.wav out.wav --preset p.json [--cuts cuts.json] [--report r.json]` |
