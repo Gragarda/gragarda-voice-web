@@ -1,14 +1,21 @@
 // Avant / Apres : la <video> joue muette, deux AudioBufferSourceNode suivent sa position ;
 // la bascule ne change que les gains -> pas de rechargement, pas de saut.
+// La piste de la <video> est captee par Web Audio sans etre branchee (donc muette) : le volume et le
+// bouton son natifs restent utilisables et pilotent le gain de sortie.
 export class AbPlayer {
   private ctx = new AudioContext({ sampleRate: 48000 });
   private bufs: AudioBuffer[];
   private gains: GainNode[];
   private srcs: AudioBufferSourceNode[] = [];
+  private master = this.ctx.createGain();
   private after = true;
 
   constructor(private video: HTMLVideoElement, before: Float32Array, after: Float32Array) {
-    video.muted = true;
+    this.ctx.createMediaElementSource(video); // non connectee : la piste originale ne sort plus
+    this.master.connect(this.ctx.destination);
+    const volume = () => { this.master.gain.value = video.muted ? 0 : video.volume; };
+    volume();
+    video.addEventListener('volumechange', volume);
     this.bufs = [before, after].map(d => {
       const b = this.ctx.createBuffer(1, d.length, 48000);
       b.copyToChannel(d as Float32Array<ArrayBuffer>, 0);
@@ -16,7 +23,7 @@ export class AbPlayer {
     });
     this.gains = this.bufs.map(() => {
       const g = this.ctx.createGain();
-      g.connect(this.ctx.destination);
+      g.connect(this.master);
       return g;
     });
     this.applyGains(0);
@@ -27,8 +34,6 @@ export class AbPlayer {
     video.addEventListener('pause', () => this.stop());
     video.addEventListener('waiting', () => this.stop());
     video.addEventListener('playing', restart);
-    // le son passe par Web Audio : le bouton son du lecteur natif ne doit pas doubler la piste
-    video.addEventListener('volumechange', () => { if (!video.muted) video.muted = true; });
     // les horloges video et audio derivent : on recale au-dela de 60 ms
     video.addEventListener('timeupdate', () => {
       if (video.paused || !this.srcs.length) return;
@@ -73,5 +78,7 @@ export class AbPlayer {
   close() {
     this.stop();
     void this.ctx.close();
+    // une <video> ne se capte qu'une fois par Web Audio : element neuf (et sans nos ecouteurs) pour la suivante
+    this.video.replaceWith(this.video.cloneNode());
   }
 }
