@@ -243,6 +243,7 @@ function showResult(out: Blob, before: Float32Array, after: Float32Array, pops: 
   const video = $<HTMLVideoElement>('player');
   video.src = outUrl;
   player = new AbPlayer(video, before, after);
+  applyVolume();
   setAb(true);
   $('pops').textContent = pops === 0 ? '' : pops === 1 ? t('pop1') : t('popN', { n: pops });
   // Voyant d'echo : vert = rien a faire, orange = de-reverb, rouge = piece tres reverberante (seuils du coeur, kRt60On/kRt60Red)
@@ -264,6 +265,30 @@ function showResult(out: Blob, before: Float32Array, after: Float32Array, pops: 
   $('share').onclick = () => navigator.share({ files: [outFile] }).catch(() => { /* partage annule */ });
   show('result');
 }
+
+// Controles maison sous le lecteur : la <video> reste muette (le son passe par AbPlayer), donc pas de controles natifs
+const pv = $<HTMLVideoElement>('player'), seek = $<HTMLInputElement>('pc-seek'), vol = $<HTMLInputElement>('pc-vol');
+let muted = false;
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const showTime = () => {
+  seek.max = String(pv.duration || 1);
+  seek.value = String(pv.currentTime);
+  $('pc-time').textContent = `${clock(pv.currentTime)} / ${clock(pv.duration || 0)}`;
+};
+function applyVolume() {
+  player?.setVolume(muted ? 0 : Number(vol.value));
+  $('pc-mute').textContent = muted || Number(vol.value) === 0 ? '🔇' : '🔊';
+}
+const togglePlay = () => { if (pv.paused) void pv.play(); else pv.pause(); };
+$('pc-play').addEventListener('click', togglePlay);
+pv.addEventListener('click', togglePlay);
+pv.addEventListener('play', () => { $('pc-play').textContent = '⏸'; });
+pv.addEventListener('pause', () => { $('pc-play').textContent = '▶'; });
+pv.addEventListener('timeupdate', showTime);
+pv.addEventListener('loadedmetadata', showTime);
+seek.addEventListener('input', () => { pv.currentTime = Number(seek.value); });
+vol.addEventListener('input', () => { muted = false; applyVolume(); });
+$('pc-mute').addEventListener('click', () => { muted = !muted; applyVolume(); });
 
 function setAb(after: boolean) {
   player?.setAfter(after);
