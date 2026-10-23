@@ -5,6 +5,7 @@ export class AbPlayer {
   private bufs: AudioBuffer[];
   private gains: GainNode[];
   private srcs: AudioBufferSourceNode[] = [];
+  private master = this.ctx.createGain();
   private after = true;
 
   constructor(private video: HTMLVideoElement, before: Float32Array, after: Float32Array) {
@@ -16,9 +17,10 @@ export class AbPlayer {
     });
     this.gains = this.bufs.map(() => {
       const g = this.ctx.createGain();
-      g.connect(this.ctx.destination);
+      g.connect(this.master);
       return g;
     });
+    this.master.connect(this.ctx.destination);
     this.applyGains(0);
     const restart = () => this.start();
     video.addEventListener('play', restart);
@@ -27,8 +29,6 @@ export class AbPlayer {
     video.addEventListener('pause', () => this.stop());
     video.addEventListener('waiting', () => this.stop());
     video.addEventListener('playing', restart);
-    // le son passe par Web Audio : le bouton son du lecteur natif ne doit pas doubler la piste
-    video.addEventListener('volumechange', () => { if (!video.muted) video.muted = true; });
     // les horloges video et audio derivent : on recale au-dela de 60 ms
     video.addEventListener('timeupdate', () => {
       if (video.paused || !this.srcs.length) return;
@@ -38,6 +38,11 @@ export class AbPlayer {
   }
   private startAt = 0;
   private startCtx = 0;
+
+  // volume de sortie (les controles natifs sont masques : la <video> reste muette)
+  setVolume(v: number) {
+    this.master.gain.setTargetAtTime(v, this.ctx.currentTime, 0.015);
+  }
 
   setAfter(after: boolean) {
     this.after = after;

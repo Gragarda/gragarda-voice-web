@@ -59,7 +59,14 @@
     </section>
 
     <section id="result" hidden>
-      <video id="player" playsinline controls></video>
+      <video id="player" playsinline></video>
+      <div class="controls">
+        <button id="pc-play" data-i18n-label="play">▶</button>
+        <input id="pc-seek" type="range" min="0" max="1" step="any" value="0" data-i18n-label="seek">
+        <span id="pc-time">0:00</span>
+        <button id="pc-mute" data-i18n-label="mute">🔊</button>
+        <input id="pc-vol" type="range" min="0" max="1" step="any" value="1" data-i18n-label="volume">
+      </div>
       <div class="ab" role="group" data-i18n-label="compare">
         <button id="ab-before" data-i18n="before">Before</button>
         <button id="ab-after" class="on" data-i18n="after">After</button>
