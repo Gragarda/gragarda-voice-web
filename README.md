@@ -1,5 +1,7 @@
 # Gragarda Voice Web
 
+**Gragarda Voice :** [Filtre OBS](https://github.com/Gragarda/gragarda-voice) · [VST3 / app autonome](https://github.com/Gragarda/gragarda-voice-vst) · **App web** · [Cœur DSP](https://github.com/Gragarda/gragarda-voice-core)
+
 Web app gratuite (PWA) qui répare et embellit la voix d'une vidéo de téléphone, puis la renvoie prête à publier,
 **sans réencoder l'image**. Tout le traitement se fait dans le navigateur : la vidéo ne quitte jamais l'appareil.
 **Utiliser l'app : https://voice.gragarda.fr/app**
