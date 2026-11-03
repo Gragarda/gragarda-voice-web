@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # ponytail: GCC 15 (ubuntu-26.04) gv-cli output drifts past the WASM = gv-cli tolerance
     steps:
       - uses: actions/checkout@v4
         with:
